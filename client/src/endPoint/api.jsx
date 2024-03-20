@@ -1,7 +1,7 @@
 
 import axios from "axios";
 
-let BaseUrl = "http://localhost:7000/api";
+let BaseUrl = "http://localhost:5000/api/v1";
 
 export const endPoint = {
   LOGIN: `${BaseUrl}/login`,

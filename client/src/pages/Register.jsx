@@ -26,23 +26,17 @@ function Register() {
     try {
       await axios.post("/users/register", {
         username: usernameValue,
-        firstname: firstValue,
-        lastname: lastValue,
+        firstName: firstValue,
+        lastName: lastValue,
         email: emailValue,
         password: passValue,
       });
-      alert("register successfull. please login ");
+      alert("register successful. please login ");
 
       Navigate('/login')
     } catch (error) {
       console.log(error.message);
     }
-    // to check if it  accept
-    // console.log(usernameDom.current.value);
-    // console.log(firstnameDom.current.value);
-    // console.log(lastnameDom.current.value);
-    // console.log(emailDom.current.value);
-    // console.log(passwordDom.current.value);
   }
 
   return (

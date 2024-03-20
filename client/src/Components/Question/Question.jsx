@@ -19,12 +19,12 @@ const Question = () => {
             <div>
               <PiUserCircleDuotone />
             </div>
-            <div>Fitsum </div>
+            <div>Getachew </div>
           </div>
           <div>
             {/* question  */}
             <p>
-              gshdfsjgj
+              Muhabaw
             </p>
           </div>
         </div>

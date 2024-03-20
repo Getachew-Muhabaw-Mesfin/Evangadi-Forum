@@ -5,10 +5,10 @@ import axios from "../../axiosConfig";
 import { v4 as uuidv4 } from "uuid";
 import { AppState } from "../../App";
 
-const AskQuestion = ({user}) => {
+const AskQuestion = ({ user }) => {
   const navigate = useNavigate();
   //const  {user}  = useContext(AppState);
-  console.log(user)
+  console.log(user);
   const token = localStorage.getItem("token");
 
   const titleDom = useRef(null);
@@ -20,14 +20,12 @@ const AskQuestion = ({user}) => {
     const titleValue = titleDom.current.value;
     const descriptionValue = descriptionDom.current.value;
     const tagValue = tagDom.current.value;
-    const userid =   user.userid;
+    const userid = user.userId;
 
-   console.log(userid);
+    console.log(userid);
 
     const questionid = uuidv4();
-    console.log(questionid)
-    
-    
+    console.log(questionid);
 
     if (
       !questionid ||
@@ -41,10 +39,11 @@ const AskQuestion = ({user}) => {
     }
 
     try {
-      const response = await axios.post("/question/postquestions",
+      const response = await axios.post(
+        "/questions",
         {
-          questionid: questionid,
-          userid: userid,
+          questionId: questionid,
+          userId: userid,
           title: titleValue,
           description: descriptionValue,
           tag: tagValue,
