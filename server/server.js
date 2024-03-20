@@ -3,6 +3,7 @@ const cors = require("cors");
 const createTables = require("./routes/createTablesRout");
 const userRoutes = require("./routes/userRoute");
 const questionRoutes = require("./routes/questionRoute");
+const answerRoutes = require("./routes/answerRoute");
 
 const app = express();
 app.use(cors());
@@ -13,6 +14,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/v1/", createTables);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/questions", questionRoutes);
+app.use("/api/v1/answers", answerRoutes);
 
 // app.use("/api/v1/", createTables);
 

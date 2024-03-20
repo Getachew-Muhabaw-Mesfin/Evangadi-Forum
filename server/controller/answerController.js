@@ -1,17 +1,17 @@
 const connection = require("../db/dbConfig");
 
 async function postAnswer(req, res) {
-  const { userid, questionid, answer } = req.body;
-  if (!questionid || !userid || !answer) {
+  const { userId, questionId, answer } = req.body;
+  if (!questionId || !userId || !answer) {
     return res.status(400).json({ msg: "please provide all required fields" });
   }
   //insert data into answers table
   try {
     await connection.query(
-      "INSERT INTO answers (userid,questionid,answer) VALUES (?,?,?)",
-      [userid, questionid, answer]
+      "INSERT INTO answers (userId,questionId,answer) VALUES (?,?,?)",
+      [userId, questionId, answer]
     );
-    return res.status(201).json({ msg: "answer posted" });
+    return res.status(201).json({ msg: "Answer posted" });
   } catch (error) {
     console.log(error.message);
     return res
@@ -19,26 +19,23 @@ async function postAnswer(req, res) {
       .json({ msg: "something went wrong, try again later............." });
   }
 }
-async function allAnswer(req, res) {
-  // const questionid = req.query.questionid;
+async function getAllAnswers(req, res) {
+  // const questionId = req.query.questionId;
 
-  const questionId = req.headers["questionid"];
-  // console.log(questionId)
+  const questionId = req.headers["questionId"];
+   console.log(req.headers)
   try {
-    // const [allanswer] = await connection.query("SELECT answer from answers where questionid=?", [questionId])
-    // return res.status(200).json({ msg: "all answer retrieved succesfully", allanswer })
-
-    const [allanswer] = await connection.query(
+    const [answers] = await connection.query(
       `SELECT users.username, answers.answer
     FROM answers
-    JOIN users ON answers.userid = users.userid
-    WHERE answers.questionid = ?
+    JOIN users ON answers.userId = users.userId
+    WHERE answers.questionId = ? ORDER BY answers.date DESC
     `,
       [questionId]
     );
     return res
       .status(200)
-      .json({ msg: "all answer retrieved succesfully", allanswer });
+      .json({ msg: "all answer retrieved successfully", answers, questionId});
   } catch (error) {
     console.log(error.message);
     return res
@@ -47,4 +44,4 @@ async function allAnswer(req, res) {
   }
 }
 
-module.exports = { postAnswer, allAnswer };
+module.exports = { postAnswer, getAllAnswers };

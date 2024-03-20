@@ -1,19 +1,8 @@
-// const express = require('express')
-// const router = express.Router()
-// const {postAnswer,allAnswer}= require('../controller/answerController')
-
-
-// router.post("/postanswers",postAnswer)
-
-// router.get("/all-answers",allAnswer)
-
-// module.exports= router
-
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { postAnswer, allAnswer } = require('../controller/answerController');
+const { postAnswer, getAllAnswers } = require("../controller/answerController");
 
-router.post("/postanswers", postAnswer);
-router.get("/all-answers", allAnswer);
+router.post("", postAnswer);
+router.get("", getAllAnswers);
 
 module.exports = router;
