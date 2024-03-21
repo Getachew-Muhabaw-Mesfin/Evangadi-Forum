@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../Header/Header";
 import axios from "../../axiosConfig";
-import { v4 as uuidv4 } from "uuid";
+import uuidv4 from "uuid4";
 import { AppState } from "../../App";
 
 const AskQuestion = ({ user }) => {
@@ -24,11 +24,11 @@ const AskQuestion = ({ user }) => {
 
     console.log(userid);
 
-    const questionid = uuidv4();
+    const questionId = uuidv4();
     console.log(questionid);
 
     if (
-      !questionid ||
+      !questionId ||
       !userid ||
       !titleValue ||
       !descriptionValue ||

@@ -1,8 +1,7 @@
 import React, { useRef } from "react";
 import axios from "../../axiosConfig";
 import { Link, useNavigate } from "react-router-dom";
-// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-// import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons'; 
+
 
 const Login = ({ setCurrentPage }) => {
   const navigate = useNavigate();
@@ -25,10 +24,10 @@ const Login = ({ setCurrentPage }) => {
         password: passValue,
       });
       alert("login successful.  ");
+      console.log(data)
       localStorage.setItem("token", data.token);
-      
       navigate('/');
-      window.location.reload()
+     
     } catch (error) {
       // alert(error?.response?.data?.msg);
       console.log(error.response.data);
