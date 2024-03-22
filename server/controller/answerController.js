@@ -44,4 +44,39 @@ async function getAllAnswers(req, res) {
   }
 }
 
-module.exports = { postAnswer, getAllAnswers };
+// For Dashboard Implementation
+
+async function updateAnswer(req, res) {
+  const { answerId, answer } = req.body;
+  if (!answerId || !answer) {
+    return res.status(400).json({ msg: "please provide all required fields" });
+  }
+  try {
+    await connection.query(
+      "UPDATE answers SET answer = ? WHERE answerId = ?",
+      [answer, answerId]
+    );
+    return res.status(201).json({ msg: "Answer updated" });
+  } catch (error) {
+    console.log(error.message);
+    return res
+      .status(500)
+      .json({ msg: "something went wrong, try again later" });
+  }
+}
+
+async function deleteAnswer(req, res) {
+  const answerId = req.params.answerId;
+  try {
+    await connection.query("DELETE FROM answers WHERE answerId = ?", [answerId]);
+    return res.status(200).json({ msg: "Answer deleted" });
+  } catch (error) {
+    console.log(error.message);
+    return res
+      .status(500)
+      .json({ msg: "something went wrong, try again later" });
+  }
+}
+  
+
+module.exports = { postAnswer, getAllAnswers, updateAnswer, deleteAnswer};

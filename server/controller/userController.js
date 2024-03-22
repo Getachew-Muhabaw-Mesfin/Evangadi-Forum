@@ -28,7 +28,7 @@ async function register(req, res) {
         .json({ msg: "password must be atleast 8 character " });
     }
 
-    // password encription
+    // password encryption
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
@@ -106,4 +106,64 @@ async function checkUser(req, res) {
   // res.send("check user");
 }
 
-module.exports = { register, login, checkUser };
+// For Dashboard Implementation
+
+async function getAllUsers(req, res) {
+  try {
+    const [users] = await connection.query(
+      `SELECT userId, username, firstName, lastName, email
+    FROM users`
+    );
+    return res
+      .status(StatusCodes.OK)
+      .json({ msg: "all users retrieved successfully", users });
+  } catch (error) {
+    console.log(error.message);
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ msg: "something went wrong, try again later" });
+  }
+}
+
+async function updateUser(req, res) {
+  const { userId, username, firstName, lastName, email } = req.body;
+  if (!userId || !username || !firstName || !lastName || !email) {
+    return res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ msg: "please provide all required fields" });
+  }
+
+  try {
+    await connection.query(
+      "UPDATE users SET username = ?, firstName = ?, lastName = ?, email = ? WHERE userId = ?",
+      [username, firstName, lastName, email, userId]
+    );
+    return res.status(StatusCodes.CREATED).json({ msg: "User updated" });
+  } catch (error) {
+    console.log(error.message);
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ msg: "something went wrong, try again later" });
+  }
+}
+
+async function deleteUser(req, res) {
+  const userId = req.params.userId;
+  try {
+    await connection.query("DELETE FROM users WHERE userId = ?", [userId]);
+    return res.status(StatusCodes.CREATED).json({ msg: "User deleted" });
+  } catch (error) {
+    console.log(error.message);
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ msg: "something went wrong, try again later" });
+  }
+}
+module.exports = {
+  register,
+  login,
+  checkUser,
+  getAllUsers,
+  updateUser,
+  deleteUser,
+};
