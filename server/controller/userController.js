@@ -1,3 +1,4 @@
+require("dotenv").config();
 const connection = require("../db/dbConfig");
 const bcrypt = require("bcrypt");
 const { StatusCodes } = require("http-status-codes");
@@ -48,53 +49,43 @@ async function register(req, res) {
 // function login(req, res) {
 //   res.send("user login");
 // }
-async function login(req, res) {
+const login = async (req, res) => {
   const { email, password } = req.body;
-  if (!email || !password) {
-    return res
-      .status(StatusCodes.BAD_REQUEST)
-      .json({ msg: "please provide all the required field  " });
-  }
 
   try {
-    const [user] = await connection.query(
-      "SELECT username,userId, password from users where email = ?",
+    // Check if the email exists in the database
+    const [userRows, _] = await connection.execute(
+      `SELECT * FROM Users WHERE email = ?`,
       [email]
     );
-    // return res.json({user :user})
-    if (user.length == 0) {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ msg: "invalid credential" });
-    }
-    // // compare the password
-    const isMatch = await bcrypt.compare(password, user[0].password);
-    if (!isMatch) {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ msg: "invalid credential" });
+
+    // If user with the provided email doesn't exist, return error
+    if (!userRows.length) {
+      return res.status(400).json({ msg: "Invalid credentials" });
     }
 
-    // ready to return token
-    // return res.json({user :user[0].password})
-    // if the user email and password is correct return token
+    // Compare passwords
+    const user = userRows[0];
+    const isPasswordMatch = await bcrypt.compare(password, user.password);
 
-    const username = user[0].username;
-    const userId = user[0].userId;
-    const token = jwt.sign({ username, userId }, process.env.JWT_SECRETE, {
-      expiresIn: "1d",
+    // If passwords don't match, return error
+    if (!isPasswordMatch) {
+      return res.status(400).json({ msg: "Invalid credentials" });
+    }
+
+    // Create JWT token
+    const payload = { userId: user.userId };
+    const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: "1h", // Adjust expiration time as needed
     });
 
-    return res
-      .status(StatusCodes.OK)
-      .json({ msg: "user login successfully", token, username });
-  } catch (err) {
-    console.log(err.message);
-    return res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ msg: "something went wrong please try again" });
+    // Return token
+    return res.status(200).json({ token: accessToken });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ msg: "Server error" });
   }
-}
+};
 
 // check functionality
 async function checkUser(req, res) {

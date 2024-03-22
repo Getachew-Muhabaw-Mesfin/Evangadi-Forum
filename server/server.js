@@ -5,6 +5,7 @@ const userRoutes = require("./routes/userRoute");
 const questionRoutes = require("./routes/questionRoute");
 const answerRoutes = require("./routes/answerRoute");
 const authMiddleware = require("./middleware/authMiddleware");
+const userRankRoutes = require("./routes/userRankRouts");
 
 const app = express();
 app.use(cors());
@@ -14,8 +15,9 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use("/api/v1/", createTables);
 app.use("/api/v1/users", userRoutes);
-app.use("/api/v1/questions",authMiddleware, questionRoutes);
-app.use("/api/v1/answers",authMiddleware, answerRoutes);
+app.use("/api/v1/questions", authMiddleware, questionRoutes);
+app.use("/api/v1/answers", authMiddleware, answerRoutes);
+app.use("/api/v1/ranks", userRankRoutes);
 
 // app.use("/api/v1/", createTables);
 
