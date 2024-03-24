@@ -34,17 +34,17 @@ const Answer = () => {
     const answerValue = answerDom.current.value;
     const userid = user.userid;
 
-    if (!questionid || !userid || !answerValue) {
-      alert("please provide all required fields");
+    if (!answerValue) {
+      alert("Please provide all Answer field");
       return;
     }
 
     try {
       await axios.post(
-        "/answers/postanswers",
+        "/answers",
         {
-          userid: userid,
-          questionid: questionid,
+          userId: userid,
+          questionId: questionid,
           answer: answerValue,
         },
         {
@@ -64,17 +64,18 @@ const Answer = () => {
   }
   async function getAnswer() {
     try {
-      const response = await axios.get("/answers/all-answers", {
+      const response = await axios.get("/answers", {
         headers: {
           Authorization: "Bearer " + token,
-          questionid: questionid,
+          questionId: questionid,
         },
       });
       //  console.log(questionid)
 
       // console.log(response.data); // Log the response data
       setData(response.data);
-      console.log(response.data);
+     console.log("Get Answer",response.data) 
+  
     } catch (error) {
       console.log(error.response);
     }

@@ -23,7 +23,6 @@ async function getAllAnswers(req, res) {
   // const questionId = req.query.questionId;
 
   const questionId = req.headers["questionId"];
-   console.log(req.headers)
   try {
     const [answers] = await connection.query(
       `SELECT users.username, answers.answer
@@ -37,7 +36,6 @@ async function getAllAnswers(req, res) {
       .status(200)
       .json({ msg: "all answer retrieved successfully", answers, questionId});
   } catch (error) {
-    console.log(error.message);
     return res
       .status(500)
       .json({ msg: "something went wrong, try again later" });
@@ -58,7 +56,6 @@ async function updateAnswer(req, res) {
     );
     return res.status(201).json({ msg: "Answer updated" });
   } catch (error) {
-    console.log(error.message);
     return res
       .status(500)
       .json({ msg: "something went wrong, try again later" });
@@ -71,7 +68,6 @@ async function deleteAnswer(req, res) {
     await connection.query("DELETE FROM answers WHERE answerId = ?", [answerId]);
     return res.status(200).json({ msg: "Answer deleted" });
   } catch (error) {
-    console.log(error.message);
     return res
       .status(500)
       .json({ msg: "something went wrong, try again later" });
