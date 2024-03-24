@@ -49,41 +49,54 @@ async function register(req, res) {
 // function login(req, res) {
 //   res.send("user login");
 // }
+// create login controller
 const login = async (req, res) => {
   const { email, password } = req.body;
-
+  if (!email || !password) {
+    return res.status(StatusCodes.BAD_REQUEST).json({
+      status: "fail",
+      msg: "Please provide email and password",
+    });
+  }
   try {
-    // Check if the email exists in the database
-    const [userRows, _] = await connection.execute(
-      `SELECT * FROM Users WHERE email = ?`,
-      [email]
+    // destructuring user and I need username,email,userId, password from users table
+    const [user] = await connection.query(
+      "SELECT username,userId,email, password FROM Users WHERE email=? OR password=?",
+      [email, password]
     );
-
-    // If user with the provided email doesn't exist, return error
-    if (!userRows.length) {
-      return res.status(400).json({ msg: "Invalid credentials" });
+    if (user.length === 0) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        status: "fail",
+        msg: "Invalid email or password",
+      });
+    }
+    // compare the password
+    const isMatch = await bcrypt.compare(password, user[0].password);
+    if (!isMatch) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        status: "fail",
+        msg: "Invalid email or password",
+      });
     }
 
-    // Compare passwords
-    const user = userRows[0];
-    const isPasswordMatch = await bcrypt.compare(password, user.password);
-
-    // If passwords don't match, return error
-    if (!isPasswordMatch) {
-      return res.status(400).json({ msg: "Invalid credentials" });
-    }
-
-    // Create JWT token
-    const payload = { userId: user.userId };
-    const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
-      expiresIn: "1h", 
+    const username = user[0].username;
+    const userId = user[0].userId;
+    const token = jwt.sign({ userId, username }, process.env.JWT_SECRET, {
+      expiresIn: "2h",
     });
 
-    // Return token
-    return res.status(200).json({ token: accessToken });
+    res.status(StatusCodes.OK).json({
+      status: "success",
+      token,
+      username,
+      email,
+      userId,
+    });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ msg: "Server error" });
+    console.error("Error logging in user:", error.message);
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ status: "fail", msg: "Internal server error" });
   }
 };
 

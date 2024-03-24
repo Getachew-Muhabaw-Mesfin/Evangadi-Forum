@@ -1,31 +1,51 @@
 const { StatusCodes } = require("http-status-codes");
 const jwt = require("jsonwebtoken");
-
-async function authMiddleware(req, res, next) {
+const authMiddleware = async (req, res, next) => {
   const authHeader = req.headers.authorization;
-
   if (!authHeader || !authHeader.startsWith("Bearer")) {
-    return res
-      .status(StatusCodes.UNAUTHORIZED)
-      .json({ msg: "Authentication invalid" });
+    return res.status(StatusCodes.UNAUTHORIZED).json({
+      status: "fail",
+      msg: "No token, authorization denied",
+    });
   }
   const token = authHeader.split(" ")[1];
-  // console.log(authHeader)
-  // console.log(token)
-
   try {
-    const { username, userId } = jwt.verify(token, process.env.JWT_SECRETE);
+    const JWT_SECRET = "secret";
+    const { username, userId } = jwt.verify(token, JWT_SECRET);
     req.user = { username, userId };
     next();
-    // const {username ,userId} = jwt.verify(authHeader , "secrete");
-    // req.user = {username ,userId}
-    // next()
-    // const data = jwt.verify(authHeader , "secrete");
-    //  return res.status(StatusCodes.OK).json({data})
+    // return res.status(StatusCodes.OK).json({
+    //   status: "success",
+    //   username,
+    //   userId,
+    // });
   } catch (error) {
-    return res
-      .status(StatusCodes.UNAUTHORIZED)
-      .json({ msg: "Authentication invalid ...." });
+    console.error("Error verifying token:", error.message);
+    res.status(StatusCodes.UNAUTHORIZED).json({
+      status: "fail",
+      msg: "Token is not valid",
+    });
   }
-}
+
+  //   const token = req.header("x-auth-token");
+  //   if (!token) {
+  //     return res.status(StatusCodes.UNAUTHORIZED).json({
+  //       status: "fail",
+  //       msg: "No token, authorization denied",
+  //     });
+  //   }
+  //   try {
+  //     const JWT_SECRET = "secret";
+  //     const {username,userId} = jwt.verify(token, JWT_SECRET);
+  //     req.user = { username, userId };
+  //     next();
+  //   } catch (error) {
+  //     console.error("Error verifying token:", error.message);
+  //     res.status(StatusCodes.UNAUTHORIZED).json({
+  //       status: "fail",
+  //       msg: "Token is not valid",
+  //     });
+  //   }
+};
+
 module.exports = authMiddleware;
