@@ -45,7 +45,6 @@ const Answer = () => {
         {
           userid: userid,
           questionid: questionid,
-
           answer: answerValue,
         },
         {
