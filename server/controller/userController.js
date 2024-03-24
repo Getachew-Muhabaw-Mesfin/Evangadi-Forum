@@ -76,7 +76,7 @@ const login = async (req, res) => {
     // Create JWT token
     const payload = { userId: user.userId };
     const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
-      expiresIn: "1h", // Adjust expiration time as needed
+      expiresIn: "1h", 
     });
 
     // Return token
