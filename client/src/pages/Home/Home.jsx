@@ -17,6 +17,7 @@ function Home(props) {
 
   const { user } = useContext(AppState);
   const { question } = useContext(AppState);
+  console.log("From the Context",question)
   const [reloaded, setReloaded] = useState(false);
 
   const handleLinkClick = () => {
@@ -47,8 +48,8 @@ function Home(props) {
         <div className="container mt-5">
           <h2>Questions</h2>
 
-          {question.allquestion &&
-            question.allquestion.map((item, index) => (
+          {question.questions &&
+            question.questions?.map((item, index) => (
               <Link
                 onClick={handleLinkClick}
                 className="text-decoration-none text-black"

@@ -2,7 +2,6 @@ import React, { useRef } from "react";
 import axios from "../../axiosConfig";
 import { Link, useNavigate } from "react-router-dom";
 
-
 const Login = ({ setCurrentPage }) => {
   const navigate = useNavigate();
   const emailDom = useRef();
@@ -14,7 +13,7 @@ const Login = ({ setCurrentPage }) => {
     const passValue = passwordDom.current.value;
     if (!emailValue || !passValue) {
       alert("please provide all required information ");
-      return
+      return;
     }
 
     // so let us send request to the database
@@ -24,10 +23,9 @@ const Login = ({ setCurrentPage }) => {
         password: passValue,
       });
       alert("login successful.  ");
-      console.log(data)
+      console.log(data);
       localStorage.setItem("token", data.token);
-      navigate('/');
-     
+      navigate("/");
     } catch (error) {
       // alert(error?.response?.data?.msg);
       console.log(error.response.data);
@@ -40,13 +38,13 @@ const Login = ({ setCurrentPage }) => {
         <h4 className="m-3">Login to your account</h4>
         <p className="mb-2">
           Don’t have an account?
-          <a
-            href=""
+          <Link
+            to="/signup"
             onClick={() => setCurrentPage("signup")}
             className="fw-semibold text-decoration-none text-warning"
           >
             Create a new account
-          </a>
+          </Link>
         </p>
       </div>
       <form onSubmit={handleSubmit}>
@@ -89,5 +87,3 @@ const Login = ({ setCurrentPage }) => {
 };
 
 export default Login;
-
-

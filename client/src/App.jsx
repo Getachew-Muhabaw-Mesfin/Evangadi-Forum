@@ -40,7 +40,8 @@ function App() {
         },
       });
       // console.log(data)
-      setQuestion(data); // Assuming data holds the question value
+      setQuestion(data); 
+      console.log("Questions",data)// Assuming data holds the question value
     } catch (error) {
       console.error("Error fetching question:", error);
     }
