@@ -1,6 +1,7 @@
 require("dotenv").config();
 const connection = require("../db/dbConfig");
 const bcrypt = require("bcrypt");
+const { use } = require("bcrypt/promises");
 const { StatusCodes } = require("http-status-codes");
 const jwt = require("jsonwebtoken");
 
@@ -46,10 +47,6 @@ async function register(req, res) {
   }
 }
 
-// function login(req, res) {
-//   res.send("user login");
-// }
-// create login controller
 const login = async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
@@ -59,7 +56,6 @@ const login = async (req, res) => {
     });
   }
   try {
-    // destructuring user and I need username,email,userId, password from users table
     const [user] = await connection.query(
       "SELECT username,userId,email, password FROM Users WHERE email=? OR password=?",
       [email, password]
@@ -82,7 +78,7 @@ const login = async (req, res) => {
     const username = user[0].username;
     const userId = user[0].userId;
     const token = jwt.sign({ userId, username }, process.env.JWT_SECRET, {
-      expiresIn: "2h",
+      expiresIn: "12h",
     });
 
     res.status(StatusCodes.OK).json({
@@ -130,24 +126,36 @@ async function getAllUsers(req, res) {
 }
 
 async function updateUser(req, res) {
-  const { userId, username, firstName, lastName, email } = req.body;
-  if (!userId || !username || !firstName || !lastName || !email) {
+  const userId = req.params;
+  console.log(userId);
+  const { username, firstName, lastName, email } = req.body;
+
+  // Check if any required field is missing
+  if (!username || !firstName || !lastName || !email) {
     return res
       .status(StatusCodes.BAD_REQUEST)
-      .json({ msg: "please provide all required fields" });
+      .json({ msg: "Please provide all required fields" });
   }
 
   try {
-    await connection.query(
+    // Update user in the database
+    const [result] = await connection.execute(
       "UPDATE Users SET username = ?, firstName = ?, lastName = ?, email = ? WHERE userId = ?",
       [username, firstName, lastName, email, userId]
     );
-    return res.status(StatusCodes.CREATED).json({ msg: "User updated" });
+
+    // Check if the user was found and updated
+    if (result.affectedRows === 0) {
+      return res.status(StatusCodes.NOT_FOUND).json({ msg: "User not found" });
+    }
+
+    // User updated successfully
+    return res.status(StatusCodes.OK).json({ msg: "User updated" });
   } catch (error) {
-    console.log(error.message);
+    console.error("Error updating user:", error);
     return res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ msg: "something went wrong, try again later" });
+      .json({ msg: "Something went wrong, try again later" });
   }
 }
 

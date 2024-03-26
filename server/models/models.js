@@ -4,7 +4,7 @@ const colors = require("colors");
 const createUserTable = async () => {
   const userQuery = `
     CREATE TABLE IF NOT EXISTS Users (
-       userId INT PRIMARY KEY AUTO_INCREMENT,
+        userId INT PRIMARY KEY AUTO_INCREMENT,
         username VARCHAR(255) NOT NULL,
         firstName VARCHAR(255) NOT NULL,
         lastName VARCHAR(255) NOT NULL,
