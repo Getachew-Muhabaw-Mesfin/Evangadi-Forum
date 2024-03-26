@@ -6,6 +6,11 @@ const calculateLeaderboardRank = async (req, res) => {
     const query = `
       SELECT u.userId, 
              u.username,
+             u.firstName,
+              u.lastName,
+              u.email,
+             COUNT(DISTINCT q.questionId) AS numberOfQuestionsAsked,
+             COUNT(DISTINCT a.answerId) AS numberOfAnswersProvided,
              COUNT(DISTINCT q.questionId) * 10 AS questionPoints,
              COUNT(DISTINCT a.answerId) * 20 AS answerPoints,
              (COUNT(DISTINCT q.questionId) * 10) + (COUNT(DISTINCT a.answerId) * 20) AS totalPoints
@@ -25,6 +30,8 @@ const calculateLeaderboardRank = async (req, res) => {
         rank: index + 1,
         userId: row.userId,
         username: row.username,
+        numberOfQuestionsAsked: row.numberOfQuestionsAsked,
+        numberOfAnswersProvided: row.numberOfAnswersProvided,
         questionPoints: row.questionPoints,
         answerPoints: row.answerPoints,
         totalPoints: row.totalPoints,
@@ -32,12 +39,10 @@ const calculateLeaderboardRank = async (req, res) => {
     });
 
     // Send the leaderboard response
-    res
-      .status(200)
-      .json({
-        message: "Leaderboard ranks calculated successfully",
-        leaderboard,
-      });
+    res.status(200).json({
+      message: "Leaderboard ranks calculated successfully",
+      leaderboard,
+    });
   } catch (error) {
     console.error("Error calculating leaderboard ranks:", error);
     res.status(500).json({ message: "Internal server error" });
