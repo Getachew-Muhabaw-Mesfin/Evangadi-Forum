@@ -1,78 +1,139 @@
 const connection = require("../db/dbConfig");
+const { StatusCodes } = require("http-status-codes");
 
+// Create an answer
 async function postAnswer(req, res) {
   const { userId, questionId, answer } = req.body;
   if (!questionId || !userId || !answer) {
-    return res.status(400).json({ msg: "please provide all required fields" });
+    return res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ status: "fail", msg: "Please provide all required fields" });
   }
   //insert data into answers table
   try {
     await connection.query(
-      "INSERT INTO answers (userId,questionId,answer) VALUES (?,?,?)",
+      "INSERT INTO Answers (userId,questionId,answer) VALUES (?,?,?)",
       [userId, questionId, answer]
     );
-    return res.status(201).json({ msg: "Answer posted" });
+    return res
+      .status(StatusCodes.CREATED)
+      .json({ status: "success", msg: "Answer posted", answer });
   } catch (error) {
     console.log(error.message);
     return res
-      .status(500)
-      .json({ msg: "something went wrong, try again later............." });
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ status: "fail", msg: "Internal server error", err: error });
   }
 }
-async function getAllAnswers(req, res) {
+
+// TODO:Get all answers By QuestionId
+async function getAllAnswersByQuestionId(req, res) {
   // const questionId = req.query.questionId;
 
   const questionId = req.headers["questionId"];
   try {
     const [answers] = await connection.query(
-      `SELECT users.username, answers.answer
-    FROM answers
-    JOIN users ON answers.userId = users.userId
-    WHERE answers.questionId = ? ORDER BY answers.date DESC
+      `SELECT Users.username, Answers.answer
+    FROM Answers
+    JOIN Users ON Answers.userId = Users.userId
+    WHERE Answers.questionId = ? ORDER BY Answers.date DESC
     `,
       [questionId]
     );
-    return res
-      .status(200)
-      .json({ msg: "all answer retrieved successfully", answers, questionId});
+    return res.status(StatusCodes.OK).json({
+      status: "success",
+      msg: "all answers retrieved successfully",
+      answers,
+      questionId,
+    });
   } catch (error) {
     return res
-      .status(500)
-      .json({ msg: "something went wrong, try again later" });
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ status: "fail", msg: "Internal server error", err: error });
   }
 }
 
 // For Dashboard Implementation
 
-async function updateAnswer(req, res) {
-  const { answerId, answer } = req.body;
-  if (!answerId || !answer) {
-    return res.status(400).json({ msg: "please provide all required fields" });
-  }
+//Get All Answers
+async function getAllAnswers(req, res) {
   try {
-    await connection.query(
-      "UPDATE answers SET answer = ? WHERE answerId = ?",
-      [answer, answerId]
+    const [answers] = await connection.query(
+      `SELECT Users.username, Answers.answer, Questions.title, Answers.date, Users.userId, Answers.answerId, Questions.questionId,Users.firstName, Users.lastName, Users.email
+       FROM Answers
+       JOIN Users ON Answers.userId = Users.userId
+       JOIN Questions ON Answers.questionId = Questions.questionId
+      `
     );
-    return res.status(201).json({ msg: "Answer updated" });
+    return res.status(StatusCodes.OK).json({
+      status: "success",
+      msg: "All answers retrieved successfully",
+      answers,
+    });
   } catch (error) {
+    console.error(error);
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ status: "fail", msg: "Internal server error", err: error });
+  }
+}
+
+// Update an answer
+async function updateAnswer(req, res) {
+  const answerId = req.params.answerId;
+  const { answer } = req.body;
+
+  if (!answer) {
+    return res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ status: "fail", msg: "Please provide all required fields" });
+  }
+
+  try {
+    await connection.query("UPDATE Answers SET answer = ? WHERE answerId = ?", [
+      answer,
+      answerId,
+    ]);
+    return res
+      .status(StatusCodes.CREATED)
+      .json({ status: "success", msg: "Answer updated", answer });
+  } catch (error) {
+    console.error(error);
     return res
       .status(500)
-      .json({ msg: "something went wrong, try again later" });
+      .json({ msg: "Something went wrong, try again later", error: error });
   }
 }
 
 async function deleteAnswer(req, res) {
   const answerId = req.params.answerId;
   try {
-    await connection.query("DELETE FROM answers WHERE answerId = ?", [answerId]);
-    return res.status(200).json({ msg: "Answer deleted" });
-  } catch (error) {
+    const result = await connection.query(
+      "DELETE FROM Answers WHERE answerId = ?",
+      [answerId]
+    );
+
+    if (result.affectedRows === 0) {
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ status: "fail", msg: "Answer not found", answerId });
+    }
+
     return res
-      .status(500)
-      .json({ msg: "something went wrong, try again later" });
+      .status(StatusCodes.OK)
+      .json({ status: "success", msg: "Answer deleted", answerId });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ status: "fail", msg: "Internal server error", err: error });
   }
 }
-  
 
-module.exports = { postAnswer, getAllAnswers, updateAnswer, deleteAnswer};
+module.exports = {
+  postAnswer,
+  getAllAnswersByQuestionId,
+  updateAnswer,
+  deleteAnswer,
+  getAllAnswers,
+};
