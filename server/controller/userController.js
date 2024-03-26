@@ -18,7 +18,14 @@ async function register(req, res) {
       "SELECT username,userId from Users where username=? or email = ?",
       [username, email]
     );
-    // return res.json({user :user})
+    // const passwordPattern =
+    //   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!%*?&_])[A-Za-z\d$@$!%*?&_]{8,}$/;
+    // if (!passwordPattern.test(password)) {
+    //   return res.status(StatusCodes.BAD_REQUEST).json({
+    //     status: "fail",
+    //     msg: "Password length must 8 and  contain at least one uppercase letter, one lowercase letter, one digit, and one special character",
+    //   });
+    // }
     if (user.length > 0) {
       return res
         .status(StatusCodes.BAD_REQUEST)
@@ -118,6 +125,15 @@ async function checkUser(req, res) {
   // res.send("check user");
 }
 
+// Logout
+async function logout(req, res) {
+  // res.clearCookie("token");
+  res.removeHeader("Authorization");
+  return res
+    .status(StatusCodes.OK)
+    .json({ status: "success", msg: "Logged out" });
+}
+
 // For Dashboard Implementation
 
 // Get all users
@@ -184,14 +200,23 @@ async function updateUser(req, res) {
 async function deleteUser(req, res) {
   const userId = req.params.userId;
   try {
-    const [result] = await connection.query("DELETE FROM Users WHERE userId = ?", [userId]);
+    const [result] = await connection.query(
+      "DELETE FROM Users WHERE userId = ?",
+      [userId]
+    );
     if (result.affectedRows === 0) {
-      return res.status(StatusCodes.NOT_FOUND).json({ status: "fail", msg: "User not found" });
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ status: "fail", msg: "User not found" });
     }
-    return res.status(StatusCodes.OK).json({ status: "success", msg: "User deleted", userId });
+    return res
+      .status(StatusCodes.OK)
+      .json({ status: "success", msg: "User deleted", userId });
   } catch (error) {
     console.log(error.message);
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ status: "fail", msg: "Internal server error" });
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ status: "fail", msg: "Internal server error" });
   }
 }
 
