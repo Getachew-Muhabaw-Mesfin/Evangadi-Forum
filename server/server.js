@@ -21,8 +21,8 @@ app.use("/api/v1/ranks", userRankRoutes);
 
 // app.use("/api/v1/", createTables);
 
-const HOST = process.env.HOST;
-const PORT = process.env.PORT;
+const HOST = "127.0.0.1";
+const PORT = 5000;
 app.listen(PORT, HOST, () => {
   console.log(`Server running at http://${HOST}:${PORT}/`);
 });

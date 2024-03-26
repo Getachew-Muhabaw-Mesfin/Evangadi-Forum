@@ -14,7 +14,7 @@ async function register(req, res) {
 
   try {
     const [user] = await connection.query(
-      "SELECT username,userId from users where username=? or email = ?",
+      "SELECT username,userId from Users where username=? or email = ?",
       [username, email]
     );
     // return res.json({user :user})
@@ -26,7 +26,7 @@ async function register(req, res) {
     if (password.length <= 8) {
       return res
         .status(StatusCodes.BAD_REQUEST)
-        .json({ msg: "password must be atleast 8 character " });
+        .json({ msg: "password must be at least 8 character " });
     }
 
     // password encryption
@@ -34,7 +34,7 @@ async function register(req, res) {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     await connection.query(
-      "INSERT INTO users ( username, firstName, lastName, email, password )  VALUES(?,?,?,?,?)",
+      "INSERT INTO Users ( username, firstName, lastName, email, password )  VALUES(?,?,?,?,?)",
       [username, firstName, lastName, email, hashedPassword]
     );
     return res.status(StatusCodes.CREATED).json({ msg: "user created" });
@@ -116,7 +116,7 @@ async function getAllUsers(req, res) {
   try {
     const [users] = await connection.query(
       `SELECT userId, username, firstName, lastName, email
-    FROM users`
+    FROM Users`
     );
     return res
       .status(StatusCodes.OK)
@@ -139,7 +139,7 @@ async function updateUser(req, res) {
 
   try {
     await connection.query(
-      "UPDATE users SET username = ?, firstName = ?, lastName = ?, email = ? WHERE userId = ?",
+      "UPDATE Users SET username = ?, firstName = ?, lastName = ?, email = ? WHERE userId = ?",
       [username, firstName, lastName, email, userId]
     );
     return res.status(StatusCodes.CREATED).json({ msg: "User updated" });
@@ -154,7 +154,7 @@ async function updateUser(req, res) {
 async function deleteUser(req, res) {
   const userId = req.params.userId;
   try {
-    await connection.query("DELETE FROM users WHERE userId = ?", [userId]);
+    await connection.query("DELETE FROM Users WHERE userId = ?", [userId]);
     return res.status(StatusCodes.CREATED).json({ msg: "User deleted" });
   } catch (error) {
     console.log(error.message);
