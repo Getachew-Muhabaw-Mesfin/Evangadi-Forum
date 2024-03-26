@@ -6,6 +6,7 @@ const questionRoutes = require("./routes/questionRoute");
 const answerRoutes = require("./routes/answerRoute");
 const authMiddleware = require("./middleware/authMiddleware");
 const userRankRoutes = require("./routes/userRankRouts");
+const countAllEntities = require("./routes/entitiesCounterRoute");
 
 const app = express();
 app.use(cors());
@@ -19,7 +20,8 @@ app.use("/api/v1/questions", authMiddleware, questionRoutes);
 app.use("/api/v1/answers", authMiddleware, answerRoutes);
 app.use("/api/v1/ranks", userRankRoutes);
 
-// app.use("/api/v1/", createTables);
+// Count All  Entities
+app.use("/api/v1/entities", countAllEntities);
 
 const HOST = "127.0.0.1";
 const PORT = 5000;
