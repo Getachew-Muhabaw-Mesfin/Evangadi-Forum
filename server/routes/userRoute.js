@@ -21,8 +21,8 @@ router.post("/login", login);
 
 // check user
 router.get("/check", authMiddleware, checkUser);
-router.get("/all", getAllUsers);
-router.patch("/:id", updateUser);
-router.delete("/:id", deleteUser);
+router.get("", getAllUsers);
+router.patch("/:userId", updateUser);
+router.delete("/:userId", deleteUser);
 
 module.exports = router;

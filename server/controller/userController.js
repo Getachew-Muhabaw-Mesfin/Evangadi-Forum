@@ -1,16 +1,16 @@
 require("dotenv").config();
 const connection = require("../db/dbConfig");
 const bcrypt = require("bcrypt");
-const { use } = require("bcrypt/promises");
 const { StatusCodes } = require("http-status-codes");
 const jwt = require("jsonwebtoken");
 
+//  User Registration
 async function register(req, res) {
   const { username, firstName, lastName, email, password } = req.body;
   if (!username || !firstName || !lastName || !email || !password) {
     return res
       .status(StatusCodes.BAD_REQUEST)
-      .json({ msg: "please provide all the information " });
+      .json({ status: "fail", msg: "Please provide all required fields" });
   }
 
   try {
@@ -22,31 +22,42 @@ async function register(req, res) {
     if (user.length > 0) {
       return res
         .status(StatusCodes.BAD_REQUEST)
-        .json({ msg: "user already exist" });
+        .json({ status: "fail", msg: "User already exists" });
     }
     if (password.length <= 8) {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ msg: "password must be at least 8 character " });
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        status: "fail",
+        msg: "Password must be greater than 8",
+        err: err,
+      });
     }
 
     // password encryption
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-
     await connection.query(
       "INSERT INTO Users ( username, firstName, lastName, email, password )  VALUES(?,?,?,?,?)",
       [username, firstName, lastName, email, hashedPassword]
     );
-    return res.status(StatusCodes.CREATED).json({ msg: "user created" });
+    return res.status(StatusCodes.CREATED).json({
+      status: "success",
+      msg: "User Register successfully",
+      user: {
+        username,
+        firstName,
+        lastName,
+        email,
+      },
+    });
   } catch (err) {
     console.log(err.message);
     return res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ msg: "something went wrong please try again" });
+      .json({ status: "fail", msg: "Internal server error", err: err });
   }
 }
 
+//User login
 const login = async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
@@ -77,7 +88,8 @@ const login = async (req, res) => {
 
     const username = user[0].username;
     const userId = user[0].userId;
-    const token = jwt.sign({ userId, username }, process.env.JWT_SECRET, {
+    console.log(process.env.JWT_SECRET);
+    const token = jwt.sign({ userId, username }, "secret", {
       expiresIn: "12h",
     });
 
@@ -92,11 +104,11 @@ const login = async (req, res) => {
     console.error("Error logging in user:", error.message);
     res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ status: "fail", msg: "Internal server error" });
+      .json({ status: "fail", msg: "Internal server error", err: error });
   }
 };
 
-// check functionality
+//Check User Authentication
 async function checkUser(req, res) {
   const username = req.user.username;
   const userId = req.user.userId;
@@ -108,6 +120,7 @@ async function checkUser(req, res) {
 
 // For Dashboard Implementation
 
+// Get all users
 async function getAllUsers(req, res) {
   try {
     const [users] = await connection.query(
@@ -116,25 +129,25 @@ async function getAllUsers(req, res) {
     );
     return res
       .status(StatusCodes.OK)
-      .json({ msg: "all users retrieved successfully", users });
+      .json({ status: "success", msg: "All users fetched", users });
   } catch (error) {
     console.log(error.message);
     return res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ msg: "something went wrong, try again later" });
+      .json({ status: "fail", msg: "Internal server error" });
   }
 }
 
+// Update user
 async function updateUser(req, res) {
-  const userId = req.params;
-  console.log(userId);
+  const userId = req.params.userId;
   const { username, firstName, lastName, email } = req.body;
 
   // Check if any required field is missing
   if (!username || !firstName || !lastName || !email) {
     return res
       .status(StatusCodes.BAD_REQUEST)
-      .json({ msg: "Please provide all required fields" });
+      .json({ status: "fail", msg: "Please provide all required fields" });
   }
 
   try {
@@ -146,31 +159,42 @@ async function updateUser(req, res) {
 
     // Check if the user was found and updated
     if (result.affectedRows === 0) {
-      return res.status(StatusCodes.NOT_FOUND).json({ msg: "User not found" });
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ status: "fail", msg: "User not found" });
     }
 
     // User updated successfully
-    return res.status(StatusCodes.OK).json({ msg: "User updated" });
+    return res.status(StatusCodes.OK).json({
+      status: "success",
+      msg: "User updated",
+      user: { username, firstName, lastName, email },
+    });
   } catch (error) {
     console.error("Error updating user:", error);
-    return res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ msg: "Something went wrong, try again later" });
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      status: "fail",
+      msg: "Internal server error",
+      error: error.message,
+    });
   }
 }
 
+// Delete user
 async function deleteUser(req, res) {
   const userId = req.params.userId;
   try {
-    await connection.query("DELETE FROM Users WHERE userId = ?", [userId]);
-    return res.status(StatusCodes.CREATED).json({ msg: "User deleted" });
+    const [result] = await connection.query("DELETE FROM Users WHERE userId = ?", [userId]);
+    if (result.affectedRows === 0) {
+      return res.status(StatusCodes.NOT_FOUND).json({ status: "fail", msg: "User not found" });
+    }
+    return res.status(StatusCodes.OK).json({ status: "success", msg: "User deleted", userId });
   } catch (error) {
     console.log(error.message);
-    return res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ msg: "something went wrong, try again later" });
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ status: "fail", msg: "Internal server error" });
   }
 }
+
 module.exports = {
   register,
   login,
