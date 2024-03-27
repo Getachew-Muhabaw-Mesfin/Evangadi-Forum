@@ -10,21 +10,30 @@ const authMiddleware = require("./middleware/authMiddleware");
 const userRankRoutes = require("./routes/userRankRouts");
 const countAllEntities = require("./routes/entitiesCounterRoute");
 const googleAuth = require("./routes/googleAuthRout");
+const MySQLStore = require("express-mysql-session")(session);
 
+// Passport config
+require("./Auth/passport")(passport);
 const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// passport Config
-require("./Auth/passport")(passport);
-
+const sessionStore = new MySQLStore({
+  /* MySQL connection options */
+  host: process.env.HOST,
+  port: process.env.PORT,
+  user: process.env.USER,
+  password: process.env.PASSWORD,
+  database: process.env.DATABASE,
+});
 // Express session
 app.use(
   session({
     secret: "keyboard cat",
     resave: false,
     saveUninitialized: false,
+    store: sessionStore,
   })
 );
 // Passport middleware
