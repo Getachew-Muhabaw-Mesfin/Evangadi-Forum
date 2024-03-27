@@ -78,6 +78,37 @@ async function getAllAnswers(req, res) {
   }
 }
 
+// get A single answer by answerId
+async function getSingleAnswer(req, res) {
+  const answerId = req.params.answerId;
+  try {
+    const [answer] = await connection.query(
+      `SELECT Users.username, Answers.answer, Questions.title, Answers.date, Users.userId, Answers.answerId, Questions.questionId,Users.firstName, Users.lastName, Users.email
+       FROM Answers
+       JOIN Users ON Answers.userId = Users.userId
+       JOIN Questions ON Answers.questionId = Questions.questionId
+       WHERE Answers.answerId = ?
+      `,
+      [answerId]
+    );
+    if (answer.length === 0) {
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ status: "fail", msg: "Answer not found", answerId });
+    }
+    return res.status(StatusCodes.OK).json({
+      status: "success",
+      msg: "Answer retrieved successfully",
+      answer: answer[0],
+    });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ status: "fail", msg: "Internal server error", err: error });
+  }
+}
+
 // Update an answer
 async function updateAnswer(req, res) {
   const answerId = req.params.answerId;
@@ -134,6 +165,7 @@ module.exports = {
   postAnswer,
   getAllAnswersByQuestionId,
   updateAnswer,
+  getSingleAnswer,
   deleteAnswer,
   getAllAnswers,
 };

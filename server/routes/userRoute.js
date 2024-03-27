@@ -12,6 +12,7 @@ const {
   getAllUsers,
   updateUser,
   deleteUser,
+  getSingleUser,
 } = require("../controller/userController");
 
 // register route
@@ -22,6 +23,7 @@ router.post("/login", login);
 // check user
 router.get("/check", authMiddleware, checkUser);
 router.get("", getAllUsers);
+router.get("/:userId", getSingleUser);
 router.patch("/:userId", updateUser);
 router.delete("/:userId", deleteUser);
 

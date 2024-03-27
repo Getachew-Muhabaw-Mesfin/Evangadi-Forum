@@ -154,6 +154,31 @@ async function getAllUsers(req, res) {
   }
 }
 
+// get A single user
+
+const getSingleUser = async (req, res) => {
+  const userId = req.params.userId;
+  try {
+    const [user] = await connection.query(
+      "SELECT userId, username, firstName, lastName, email FROM Users WHERE userId = ?",
+      [userId]
+    );
+    if (user.length === 0) {
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ status: "fail", msg: "User not found" });
+    }
+    return res
+      .status(StatusCodes.OK)
+      .json({ status: "success", msg: "User fetched", user: user[0] });
+  } catch (error) {
+    console.log(error.message);
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ status: "fail", msg: "Internal server error" });
+  }
+};
+
 // Update user
 async function updateUser(req, res) {
   const userId = req.params.userId;
@@ -227,4 +252,5 @@ module.exports = {
   getAllUsers,
   updateUser,
   deleteUser,
+  getSingleUser
 };

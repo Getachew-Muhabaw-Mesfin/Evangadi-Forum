@@ -34,8 +34,9 @@ app.use(passport.session());
 // Routes
 app.use("/api/v1/", createTables);
 app.use("/api/v1/users", userRoutes);
-app.use("/api/v1/questions", authMiddleware, questionRoutes);
-app.use("/api/v1/answers", authMiddleware, answerRoutes);
+// TODO: Add authMiddleware to the routes that need authentication
+app.use("/api/v1/questions", questionRoutes);
+app.use("/api/v1/answers", answerRoutes);
 app.use("/api/v1/ranks", userRankRoutes);
 
 // Count All  Entities
