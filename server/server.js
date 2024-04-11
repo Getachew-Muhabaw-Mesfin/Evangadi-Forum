@@ -34,8 +34,8 @@ app.use(passport.session());
 // Routes
 app.use("/api/v1/", createTables);
 app.use("/api/v1/users", userRoutes);
-app.use("/api/v1/questions",authMiddleware, questionRoutes);
-app.use("/api/v1/answers",authMiddleware, answerRoutes);
+app.use("/api/v1/questions", authMiddleware, questionRoutes);
+app.use("/api/v1/answers", authMiddleware, answerRoutes);
 app.use("/api/v1/ranks", authMiddleware, userRankRoutes);
 
 // Count All  Entities
@@ -44,9 +44,13 @@ app.use("/api/v1/entities", countAllEntities);
 // Google Auth
 app.use("/auth", googleAuth);
 
+// for undefined route
+app.use("*", (req, res) => {
+  res.status(404).json({ msg: "ERROR" });
+});
+
 const HOST = "127.0.0.1";
 const PORT = 5000;
 app.listen(PORT, HOST, () => {
   console.log(`Server running at http://${HOST}:${PORT}/`);
 });
-
