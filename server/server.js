@@ -49,7 +49,7 @@ app.use("*", (req, res) => {
   res.status(404).json({ msg: "ERROR" });
 });
 
-const HOST = "127.0.0.1";
+const HOST = "0.0.0.0";
 const PORT = 5000;
 app.listen(PORT, HOST, () => {
   console.log(`Server running at http://${HOST}:${PORT}/`);
